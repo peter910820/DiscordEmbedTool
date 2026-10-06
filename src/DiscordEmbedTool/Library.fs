@@ -1,1 +1,0 @@
-﻿module DiscordEmbedTool.Library
