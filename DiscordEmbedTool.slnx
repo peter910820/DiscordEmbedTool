@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DiscordEmbedTool.Web/DiscordEmbedTool.Web.fsproj" />
+    <Project Path="src/DiscordEmbedTool/DiscordEmbedTool.fsproj" />
+  </Folder>
+</Solution>
