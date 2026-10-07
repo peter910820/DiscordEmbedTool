@@ -1,4 +1,4 @@
-namespace DiscordEmbedTool
+module Domain
 
 type BotCredential = { Token: string }
 
@@ -28,6 +28,10 @@ type SendRequest =
 
 type SendReceipt =
     { ChannelId: uint64; MessageId: uint64 }
+
+type GuildSummary = { Id: uint64; Name: string }
+
+type ChannelSummary = { Id: uint64; Name: string }
 
 module Embed =
     let private clean (value: string) =
