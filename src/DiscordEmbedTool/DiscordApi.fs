@@ -84,3 +84,67 @@ let listChannels (token: string) (guildId: uint64) =
                         | _ -> return Error(Discord "找不到伺服器")
                     })
     }
+
+let private buildEmbed (request: SendRequest) =
+    let builder = EmbedBuilder()
+
+    let builder =
+        match request.Title with
+        | Some title -> builder.WithTitle title
+        | None -> builder
+
+    let builder =
+        match request.Description with
+        | Some description -> builder.WithDescription description
+        | None -> builder
+
+    let builder =
+        match request.Url with
+        | Some url -> builder.WithUrl url
+        | None -> builder
+
+    let builder =
+        match request.Color with
+        | Some color -> builder.WithColor(uint32 color)
+        | None -> builder
+
+    match request.Footer with
+    | Some footer -> builder.WithFooter(footer, null)
+    | None -> builder
+    |> _.Build()
+
+let send (request: SendRequest) =
+    task {
+        if System.String.IsNullOrWhiteSpace request.Token then
+            return Error(Validation "請輸入 Token")
+        elif request.ChannelId = 0UL then
+            return Error(Validation "請選擇頻道")
+        else
+            return!
+                run request.Token (fun client ->
+                    task {
+                        let discord = client :> IDiscordClient
+                        let! channel = discord.GetChannelAsync request.ChannelId
+
+                        match channel with
+                        | :? IRestMessageChannel as messageChannel ->
+                            let! message =
+                                messageChannel.SendMessageAsync(
+                                    Option.toObj request.Content,
+                                    false,
+                                    buildEmbed request
+                                )
+
+                            try
+                                for reaction in request.Reactions do
+                                    do! message.AddReactionAsync(Emoji reaction)
+
+                                return
+                                    Ok
+                                        { ChannelId = request.ChannelId
+                                          MessageId = message.Id }
+                            with ex ->
+                                return Error(Discord $"訊息已送出（{message.Id}），點表情失敗：{ex.Message}")
+                        | _ -> return Error(Discord "這個頻道不能發訊息")
+                    })
+    }
