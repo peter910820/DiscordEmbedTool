@@ -34,6 +34,26 @@ let private run (token: string) (action: DiscordRestClient -> Task<Result<'T, Ap
             return Error(Discord ex.Message)
     }
 
+let private readGuilds (pages: System.Collections.Generic.IAsyncEnumerable<System.Collections.Generic.IReadOnlyCollection<RestUserGuild>>) =
+    let rec loop (enumerator: System.Collections.Generic.IAsyncEnumerator<System.Collections.Generic.IReadOnlyCollection<RestUserGuild>>) acc =
+        task {
+            let! more = enumerator.MoveNextAsync()
+
+            if more then
+                let acc =
+                    enumerator.Current
+                    |> Seq.fold (fun acc guild -> guild :: acc) acc
+
+                return! loop enumerator acc
+            else
+                return List.rev acc
+        }
+
+    task {
+        use enumerator = pages.GetAsyncEnumerator()
+        return! loop enumerator []
+    }
+
 let listGuilds (token: string) =
     task {
         if System.String.IsNullOrWhiteSpace token then
@@ -42,14 +62,13 @@ let listGuilds (token: string) =
             return!
                 run token (fun client ->
                     task {
-                        let discord = client :> IDiscordClient
-                        let! guilds = discord.GetGuildsAsync()
+                        let! guilds = readGuilds (client.GetGuildSummariesAsync())
 
                         return
                             guilds
                             |> Seq.map (fun guild ->
-                                { Id = guild.Id
-                                  Name = nameOf guild.Name })
+                                ({ Id = guild.Id
+                                   Name = nameOf guild.Name }: GuildSummary))
                             |> Seq.sortBy (fun guild -> guild.Name)
                             |> Seq.toList
                             |> Ok
@@ -75,6 +94,7 @@ let listChannels (token: string) (guildId: uint64) =
 
                             return
                                 channels
+                                |> Seq.filter (fun channel -> channel.ChannelType = ChannelType.Text)
                                 |> Seq.map (fun channel ->
                                     { Id = channel.Id
                                       Name = nameOf channel.Name })
