@@ -7,23 +7,19 @@ type ApiError =
     | Discord of string
 
 type EmbedDraft =
-    { Content: string
-      Title: string
+    { Title: string
       Description: string
       Color: string
       Url: string
-      Footer: string
       Reactions: string }
 
 type SendRequest =
     { Token: string
       ChannelId: uint64
-      Content: string option
       Title: string option
       Description: string option
       Color: int option
       Url: string option
-      Footer: string option
       Reactions: string list }
 
 type SendReceipt =
@@ -68,11 +64,8 @@ module Embed =
             Error(Validation "請輸入 Token")
         elif channelId = 0UL then
             Error(Validation "請選擇頻道")
-        elif
-            System.String.IsNullOrWhiteSpace draft.Title
-            && System.String.IsNullOrWhiteSpace draft.Description
-        then
-            Error(Validation "標題與描述至少填一項")
+        elif System.String.IsNullOrWhiteSpace draft.Title then
+            Error(Validation "請填標題")
         else
             match parseColor draft.Color, parseReactions draft.Reactions with
             | Error error, _ -> Error error
@@ -81,10 +74,8 @@ module Embed =
                 Ok
                     { Token = credential.Token.Trim()
                       ChannelId = channelId
-                      Content = clean draft.Content
                       Title = clean draft.Title
                       Description = clean draft.Description
                       Color = color
                       Url = clean draft.Url
-                      Footer = clean draft.Footer
                       Reactions = reactions }

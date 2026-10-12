@@ -59,12 +59,38 @@ let channelsFragment (channels: ChannelSummary list) =
 
 let channelsError (error: ApiError) = p (class' = "error") { describe error }
 
+let sendResult (receipt: SendReceipt) =
+    p (class' = "ok") { $"已送出，訊息 id {receipt.MessageId}" }
+
+let sendError (error: ApiError) = p (class' = "error") { describe error }
+
+let private embedForm =
+    (form () {
+        label (for' = "title") { "標題" }
+        input (id = "title", name = "Title", type' = "text")
+        label (for' = "description") { "描述" }
+        textarea (id = "description", name = "Description", class' = "markdown", rows = 8)
+        p (class' = "hint") { "可用 Discord markdown，例如 **粗體**、`程式碼`、[文字](網址)。" }
+        label (for' = "color") { "顏色" }
+        input (id = "color", name = "Color", type' = "text", placeholder = "#RRGGBB")
+        label (for' = "url") { "連結" }
+        input (id = "url", name = "Url", type' = "text")
+        p (class' = "hint") { "標題的連結。" }
+        label (for' = "reactions") { "表情" }
+        input (id = "reactions", name = "Reactions", type' = "text")
+        p (class' = "hint") { "Unicode 直接打。群組表情用 <:名稱:id>，動態用 <a:名稱:id>。空白分隔，最多 5 個。" }
+        button (type' = "submit") { "送出" }
+    })
+        .hxPost("/send")
+        .hxInclude("#token, #channel-slot")
+        .hxTarget
+        "#result"
+
 let page =
     html (lang = "zh-Hant") {
         head () {
             meta (charset = "utf-8")
             meta (name = "viewport", content = "width=device-width, initial-scale=1")
-            title () { "Discord 嵌入訊息" }
             link (rel = "stylesheet", href = "/app.css")
             script (src = "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/htmx.min.js")
         }
@@ -82,8 +108,10 @@ let page =
                 div (id = "guild-slot") { placeholder "GuildId" "先輸入 Token" }
                 label () { "頻道" }
                 div (id = "channel-slot") { placeholder "ChannelId" "先選擇伺服器" }
+                embedForm
+                div (id = "result")
                 div (id = "loading", class' = "loading") { span (class' = "spinner") }
             })
-                .hxIndicator("#loading", HxModifier.inherited)
+                .hxIndicator ("#loading", HxModifier.inherited)
         }
     }

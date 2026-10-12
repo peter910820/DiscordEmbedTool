@@ -3,6 +3,7 @@ open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
 open Oxpecker
 open DiscordApi
+open Domain
 
 let guilds: EndpointHandler =
     fun ctx ->
@@ -34,9 +35,37 @@ let channels: EndpointHandler =
             | Error error -> return! htmlView (Views.channelsError error) ctx
         }
 
+let send: EndpointHandler =
+    fun ctx ->
+        task {
+            let! form = ctx.Request.ReadFormAsync()
+            let token = form["Token"].ToString()
+
+            let channelId =
+                match System.UInt64.TryParse(form["ChannelId"].ToString()) with
+                | true, id -> id
+                | false, _ -> 0UL
+
+            let draft =
+                { Title = form["Title"].ToString()
+                  Description = form["Description"].ToString()
+                  Color = form["Color"].ToString()
+                  Url = form["Url"].ToString()
+                  Reactions = form["Reactions"].ToString() }
+
+            match Embed.validate { Token = token } draft channelId with
+            | Error error -> return! htmlView (Views.sendError error) ctx
+            | Ok request ->
+                let! result = DiscordApi.send request
+
+                match result with
+                | Ok receipt -> return! htmlView (Views.sendResult receipt) ctx
+                | Error error -> return! htmlView (Views.sendError error) ctx
+        }
+
 let endpoints =
     [ GET [ route "/" <| htmlView Views.page ]
-      POST [ route "/guilds" guilds; route "/channels" channels ] ]
+      POST [ route "/guilds" guilds; route "/channels" channels; route "/send" send ] ]
 
 [<EntryPoint>]
 let main args =

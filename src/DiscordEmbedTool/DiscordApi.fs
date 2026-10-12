@@ -7,6 +7,11 @@ open Domain
 
 let private nameOf (value: string) = if isNull value then "" else value
 
+let private reactionOf (raw: string) =
+    match Emote.TryParse raw with
+    | true, emote -> emote :> IEmote
+    | _ -> Emoji raw :> IEmote
+
 let private normalizeToken (token: string) =
     let trimmed = token.Trim()
     let prefix = "Bot "
@@ -34,15 +39,19 @@ let private run (token: string) (action: DiscordRestClient -> Task<Result<'T, Ap
             return Error(Discord ex.Message)
     }
 
-let private readGuilds (pages: System.Collections.Generic.IAsyncEnumerable<System.Collections.Generic.IReadOnlyCollection<RestUserGuild>>) =
-    let rec loop (enumerator: System.Collections.Generic.IAsyncEnumerator<System.Collections.Generic.IReadOnlyCollection<RestUserGuild>>) acc =
+let private readGuilds
+    (pages: System.Collections.Generic.IAsyncEnumerable<System.Collections.Generic.IReadOnlyCollection<RestUserGuild>>)
+    =
+    let rec loop
+        (enumerator:
+            System.Collections.Generic.IAsyncEnumerator<System.Collections.Generic.IReadOnlyCollection<RestUserGuild>>)
+        acc
+        =
         task {
             let! more = enumerator.MoveNextAsync()
 
             if more then
-                let acc =
-                    enumerator.Current
-                    |> Seq.fold (fun acc guild -> guild :: acc) acc
+                let acc = enumerator.Current |> Seq.fold (fun acc guild -> guild :: acc) acc
 
                 return! loop enumerator acc
             else
@@ -68,7 +77,8 @@ let listGuilds (token: string) =
                             guilds
                             |> Seq.map (fun guild ->
                                 ({ Id = guild.Id
-                                   Name = nameOf guild.Name }: GuildSummary))
+                                   Name = nameOf guild.Name }
+                                : GuildSummary))
                             |> Seq.sortBy (fun guild -> guild.Name)
                             |> Seq.toList
                             |> Ok
@@ -123,13 +133,8 @@ let private buildEmbed (request: SendRequest) =
         | Some url -> builder.WithUrl url
         | None -> builder
 
-    let builder =
-        match request.Color with
-        | Some color -> builder.WithColor(uint32 color)
-        | None -> builder
-
-    match request.Footer with
-    | Some footer -> builder.WithFooter(footer, null)
+    match request.Color with
+    | Some color -> builder.WithColor(uint32 color)
     | None -> builder
     |> _.Build()
 
@@ -148,16 +153,11 @@ let send (request: SendRequest) =
 
                         match channel with
                         | :? IRestMessageChannel as messageChannel ->
-                            let! message =
-                                messageChannel.SendMessageAsync(
-                                    Option.toObj request.Content,
-                                    false,
-                                    buildEmbed request
-                                )
+                            let! message = messageChannel.SendMessageAsync(null, false, buildEmbed request)
 
                             try
                                 for reaction in request.Reactions do
-                                    do! message.AddReactionAsync(Emoji reaction)
+                                    do! message.AddReactionAsync(reactionOf reaction)
 
                                 return
                                     Ok
