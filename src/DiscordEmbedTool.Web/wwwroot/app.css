@@ -1,22 +1,44 @@
 body {
   margin: 0;
   font-family: "Segoe UI", sans-serif;
-  background: #f4f5f7;
-  color: #1f2328;
+  line-height: 1.45;
+  background: #111214;
+  color: #f2f3f5;
+  color-scheme: dark;
 }
 
 main {
   max-width: 40rem;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background: #fff;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
+  margin: 2.5rem auto;
+  padding: 1.75rem;
+  background: #1e1f22;
+  border: 1px solid #2e3035;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+h2 {
+  margin: 1.6rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid #2e3035;
+  font-size: 0.95rem;
+}
+
+main > section:first-of-type h2 {
+  margin-top: 1.25rem;
+  padding-top: 0;
+  border-top: 0;
 }
 
 label {
   display: block;
-  margin-top: 1rem;
+  margin-top: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 600;
 }
 
@@ -27,31 +49,77 @@ textarea {
   width: 100%;
   box-sizing: border-box;
   margin-top: 0.35rem;
-  padding: 0.45rem 0.55rem;
+  padding: 0.5rem 0.65rem;
   font: inherit;
+  color: inherit;
+  background: #111214;
+  border: 1px solid #3f4147;
+  border-radius: 6px;
+}
+
+input::placeholder {
+  color: #949ba4;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #5865f2;
+  outline-offset: 1px;
+  border-color: #5865f2;
+}
+
+select:disabled {
+  color: #949ba4;
+  background: #2b2d31;
 }
 
 textarea.markdown {
   min-height: 10rem;
   resize: vertical;
   font-family: Consolas, "Cascadia Mono", monospace;
+  line-height: 1.5;
 }
-  margin-top: 0.75rem;
-  padding: 0.45rem 0.8rem;
+
+button {
+  margin-top: 1rem;
+  padding: 0.5rem 0.95rem;
   font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: #5865f2;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button.secondary {
+  color: #f2f3f5;
+  background: #2b2d31;
+  border: 1px solid #3f4147;
 }
 
 .hint {
-  color: #59636e;
-  font-size: 0.9rem;
+  margin: 0.35rem 0 0;
+  color: #949ba4;
+  font-size: 0.85rem;
+}
+
+.error,
+.ok {
+  margin: 1rem 0 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 6px;
 }
 
 .error {
-  color: #a40e26;
+  color: #ffb4b4;
+  background: #3f1d24;
 }
 
 .ok {
-  color: #1a7f37;
+  color: #b7ebc6;
+  background: #1d3a28;
 }
 
 .loading {
@@ -61,7 +129,7 @@ textarea.markdown {
   z-index: 10;
   align-items: center;
   justify-content: center;
-  background: rgb(0 0 0 / 0.35);
+  background: rgb(0 0 0 / 0.55);
 }
 
 .loading.htmx-request {

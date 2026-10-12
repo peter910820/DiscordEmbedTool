@@ -66,6 +66,7 @@ let sendError (error: ApiError) = p (class' = "error") { describe error }
 
 let private embedForm =
     (form () {
+        h2 () { "內容" }
         label (for' = "title") { "標題" }
         input (id = "title", name = "Title", type' = "text")
         label (for' = "description") { "描述" }
@@ -98,16 +99,27 @@ let page =
         body () {
             (main () {
                 h1 () { "Discord 嵌入訊息" }
-                label (for' = "token") { "Token" }
-                input (id = "token", name = "Token", type' = "password", autocomplete = "off")
-                p (class' = "hint") { "Token 只隨這次請求送出，不會寫進設定檔。" }
 
-                (button (type' = "button") { "載入伺服器" }).hxPost("/guilds").hxInclude("#token").hxTarget "#guild-slot"
+                section () {
+                    h2 () { "連線" }
+                    label (for' = "token") { "Token" }
+                    input (id = "token", name = "Token", type' = "password", autocomplete = "off")
+                    p (class' = "hint") { "Token 只隨這次請求送出，不會寫進設定檔。" }
 
-                label () { "伺服器" }
-                div (id = "guild-slot") { placeholder "GuildId" "先輸入 Token" }
-                label () { "頻道" }
-                div (id = "channel-slot") { placeholder "ChannelId" "先選擇伺服器" }
+                    (button (type' = "button", class' = "secondary") { "載入伺服器" })
+                        .hxPost("/guilds")
+                        .hxInclude("#token")
+                        .hxTarget("#guild-slot")
+                }
+
+                section () {
+                    h2 () { "頻道" }
+                    label () { "伺服器" }
+                    div (id = "guild-slot") { placeholder "GuildId" "先輸入 Token" }
+                    label () { "頻道" }
+                    div (id = "channel-slot") { placeholder "ChannelId" "先選擇伺服器" }
+                }
+
                 embedForm
                 div (id = "result")
                 div (id = "loading", class' = "loading") { span (class' = "spinner") }
