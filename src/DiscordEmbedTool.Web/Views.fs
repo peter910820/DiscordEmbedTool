@@ -79,7 +79,7 @@ let private embedForm =
         p (class' = "hint") { "標題的連結。" }
         label (for' = "reactions") { "表情" }
         input (id = "reactions", name = "Reactions", type' = "text")
-        p (class' = "hint") { "Unicode 直接打。群組表情用 <:名稱:id>，動態用 <a:名稱:id>。空白分隔，最多 5 個。" }
+        p (class' = "hint") { "Unicode 直接打。群組表情用 <:名稱:id>，動態用 <a:名稱:id>。空白分隔，最多 20 個。" }
         button (type' = "submit") { "送出" }
     })
         .hxPost("/send")

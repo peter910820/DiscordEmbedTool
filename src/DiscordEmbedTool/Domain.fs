@@ -54,8 +54,8 @@ module Embed =
                 raw.Split([| ' '; '\t'; '\r'; '\n' |], System.StringSplitOptions.RemoveEmptyEntries)
                 |> Array.toList
 
-            if parts.Length > 5 then
-                Error(Validation "表情最多 5 個")
+            if parts.Length > 20 then
+                Error(Validation "表情最多 20 個")
             else
                 Ok parts
 
