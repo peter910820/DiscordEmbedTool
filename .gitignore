@@ -65,3 +65,5 @@ nunit-*.xml
 
 # Secrets
 secrets.json
+
+/publish/
